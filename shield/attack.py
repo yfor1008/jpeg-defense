@@ -64,17 +64,12 @@ def attack(tfrecord_paths_expression,
     normalized_l2_distance = AverageNormalizedL2DistanceMeter()
 
     # Define preprocessing function
-    img_size = Model.default_image_size
-    preprocessing_fn = \
-        (lambda x: preprocess_image(
-            x, img_size, img_size,
-            cropping=False,
-            is_training=False)) \
-        if decode_pixels else lambda x: x
+    # img_size = Model.default_image_size
+    img_size = 256
+    preprocessing_fn = (lambda x: preprocess_image(x, img_size, img_size, cropping=False, is_training=False)) if decode_pixels else lambda x: x
 
     # Define the writer that will save the output of the attack
-    writer = tf.python_io.TFRecordWriter(
-        os.path.join(output_dir, ATTACKED_TFRECORD_FILENAME))
+    writer = tf.python_io.TFRecordWriter(os.path.join(output_dir, ATTACKED_TFRECORD_FILENAME))
 
     with tf.Graph().as_default():
         # Initialize the data loader node in the tensorflow graph
@@ -102,8 +97,7 @@ def attack(tfrecord_paths_expression,
             X_adv.set_shape((None, None, None, 3))
 
             y_pred_adv = tf.argmax(model.fprop(X_adv)['probs'], 1)
-            _, top_k_preds_adv = \
-                tf.nn.top_k(model.fprop(X_adv)['probs'], k=5)
+            _, top_k_preds_adv = tf.nn.top_k(model.fprop(X_adv)['probs'], k=5)
 
             # Initialize and load model weights
             tf.local_variables_initializer().run()
@@ -119,12 +113,7 @@ def attack(tfrecord_paths_expression,
                 with tqdm(total=NUM_SAMPLES_VALIDATIONSET, unit='imgs') as pbar:
                     while not coord.should_stop():
                         # Get attacked images and predicted labels for a batch
-                        ids_, X_ben_, X_adv_, \
-                            y_true_, y_pred_adv_, \
-                            top_k_preds_adv_ = sess.run(
-                                [ids, X_ben, X_adv,
-                                 y_true, y_pred_adv,
-                                 top_k_preds_adv])
+                        ids_, X_ben_, X_adv_, y_true_, y_pred_adv_, top_k_preds_adv_ = sess.run([ids, X_ben, X_adv, y_true, y_pred_adv, top_k_preds_adv])
 
                         top_k_preds_adv_ = np.squeeze(top_k_preds_adv_)
 
@@ -134,15 +123,13 @@ def attack(tfrecord_paths_expression,
                         normalized_l2_distance.offer(X_ben_, X_adv_)
 
                         # Save the attacked images
-                        for example in encode_tf_examples(
-                                ids_, X_adv_, y_true_):
+                        for example in encode_tf_examples(ids_, X_adv_, y_true_):
                             writer.write(example.SerializeToString())
 
                         pbar.set_postfix(
                             top_1_accuracy=accuracy.evaluate(),
                             top_5_accuracy=top5_accuracy.evaluate(),
-                            average_normalized_l2=
-                            normalized_l2_distance.evaluate())
+                            average_normalized_l2=normalized_l2_distance.evaluate())
                         pbar.update(len(ids_))
 
             except tf.errors.OutOfRangeError:

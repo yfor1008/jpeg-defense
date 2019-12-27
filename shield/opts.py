@@ -5,15 +5,16 @@ from cleverhans.attacks import FastGradientMethod, DeepFool, CarliniWagnerL2
 
 from shield.constants import CHECKPOINTS_DIR
 from shield.models.inception_v4 import InceptionV4
-from shield.models.resnet_50_v2 import ResNet50v2
+# from shield.models.resnet_50_v2 import ResNet50v2
 from shield.utils.defenses import (jpeg_compress, slq,
                                    median_filter,
                                    denoise_tv_bregman)
 
+from shield.models.slim_models import resnet_v2_50, resnet_v2_152, mobilenet_v2
 
 # -----
 
-models = ['resnet_50_v2', 'inception_v4']
+models = ['resnet_v2_50', 'resnet_v2_152', 'inception_v3', 'inception_v4', 'inception_resnet_v2', 'mobilenet_v2']
 attacks = ['fgsm', 'df', 'cwl2']
 defenses = ['jpeg', 'slq', 'median_filter', 'tv_bregman']
 tf_defenses = ['jpeg', 'slq']
@@ -21,16 +22,20 @@ tf_defenses = ['jpeg', 'slq']
 # -----
 
 model_class_map = {
-    'resnet_50_v2': ResNet50v2,
+    'resnet_v2_50': resnet_v2_50,
+    'resnet_v2_152': resnet_v2_152,
+    'mobilenet_v2': mobilenet_v2,
     'inception_v4': InceptionV4}
 
 model_checkpoint_map = {
-    'resnet_50_v2': os.path.join(CHECKPOINTS_DIR, 'resnet_v2_50.ckpt'),
+    'resnet_v2_50': os.path.join(CHECKPOINTS_DIR, 'resnet_v2_50/model.ckpt-200000'),
+    'resnet_v2_152': os.path.join(CHECKPOINTS_DIR, 'resnet_v2_152/model.ckpt-120107'),
+    'mobilenet_v2': os.path.join(CHECKPOINTS_DIR, 'mobilenet_v2/model.ckpt-100000'),
     'inception_v4': os.path.join(CHECKPOINTS_DIR, 'inception_v4.ckpt')}
 
-model_slim_name_map = {
-    'resnet_50_v2': 'resnet_v2_50',
-    'inception_v4': 'inception_v4'}
+# model_slim_name_map = {
+#     'resnet_v2_50': 'resnet_v2_50',
+#     'inception_v4': 'inception_v4'}
 
 # -----
 
@@ -42,17 +47,17 @@ attack_class_map = {
 attack_options = {
     'fgsm': {
         'ord': np.inf,
-        'eps': (2. * 8. / 255.),
-        'clip_min': -1., 'clip_max': 1.},
+        'eps': (2. * 4. / 255.),
+        'clip_min': 0., 'clip_max': 1.},
     'df': {
         'nb_candidate': 10,
         'max_iter': 100,
-        'clip_min': -1., 'clip_max': 1.},
+        'clip_min': 0., 'clip_max': 1.},
     'cwl2': {
         'confidence': 0,
         'learning_rate': 5e-3,
         'batch_size': 4,
-        'clip_min': -1., 'clip_max': 1.}}
+        'clip_min': 0., 'clip_max': 1.}}
 
 attack_identifiers = {
     'fgsm': lambda p: 'ord_%s_eps_%s' % (p['ord'], int(p['eps'] * 255 / 2)),

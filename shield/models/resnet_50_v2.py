@@ -41,9 +41,9 @@ class ResNet50v2(CleverHansModel):
             to be restored in the graph.
     """
 
-    default_image_size = 299
+    default_image_size = 256
 
-    def __init__(self, x, num_classes=1001, is_training=False):
+    def __init__(self, x, num_classes=15, is_training=False):
         """Initializes the tensorflow graph for the ResNet50-v2 model.
 
         Args:
@@ -61,6 +61,7 @@ class ResNet50v2(CleverHansModel):
         self.num_classes = num_classes
 
         # populating the tensorflow graph
+        print(type(resnet_arg_scope()))
         with slim.arg_scope(resnet_arg_scope()):
             net, end_points = resnet_v2_50(
                 x, num_classes=num_classes,

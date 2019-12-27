@@ -74,8 +74,7 @@ def main(use_gpu, perform,
 
         input_tfrecords = os.path.join(VALIDATION_DATA_DIR, '*')
 
-        attack_identifier = \
-            opts.attack_identifiers[attack](attack_options_updated)
+        attack_identifier = opts.attack_identifiers[attack](attack_options_updated)
         experiment_id.append('%s_%s' % (attack, attack_identifier))
         experiment_id = '-'.join(experiment_id)
 

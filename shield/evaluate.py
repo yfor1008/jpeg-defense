@@ -72,8 +72,7 @@ def evaluate(tfrecord_paths_expression,
         # Create rest of the tensorflow graph
         model = Model(X)
         y_pred = tf.argmax(model.fprop(X)['probs'], 1)
-        _, top_k_preds = \
-            tf.nn.top_k(model.fprop(X)['probs'], k=5)
+        _, top_k_preds = tf.nn.top_k(model.fprop(X)['probs'], k=5)
 
         # Initialize the tensorflow session
         gpu_options = tf.GPUOptions(
